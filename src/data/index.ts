@@ -1,5 +1,5 @@
 import { v4 as uuid } from "uuid";
-import { type IProduct } from "../interfaces";
+import { type IFormInput, type IProduct } from "../interfaces";
 
 export const productList: IProduct[] = [
   {
@@ -146,7 +146,7 @@ export const productList: IProduct[] = [
   },
 ];
 
-export const formInputsList = [
+export const formInputsList: IFormInput[] = [
   {
     id: "title",
     name: "title",
