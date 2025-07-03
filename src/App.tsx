@@ -1,6 +1,6 @@
 import { useState, type ChangeEvent } from "react";
 import ProductCard from "./components/ProductCard";
-import MyModal from "./components/ui/Dialog";
+import MyModal from "./components/ui/MyModal";
 import { formInputsList, productList } from "./data";
 import Button from "./components/ui/Button";
 import Input from "./components/ui/Input";
@@ -32,6 +32,8 @@ const App = () => {
     setProduct({ ...product, [name]: value });
   };
 
+  console.log(product);
+
   // **Render
   const products = productList.map((product) => (
     <ProductCard product={product} />
@@ -57,7 +59,7 @@ const App = () => {
           name={name}
           id={id}
           className="border-2 border-gray-300"
-          value={""}
+          value={product[name]}
           onChange={onChangeHandler}
         />
       </div>
