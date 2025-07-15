@@ -1,12 +1,14 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import ProductCard from "./components/ProductCard";
 import MyModal from "./components/ui/MyModal";
-import { formInputsList, productList } from "./data";
+import { colors, formInputsList, productList } from "./data";
 import Button from "./components/ui/Button";
 import Input from "./components/ui/Input";
 import type { IProduct } from "./interfaces";
 import { productValidation } from "./validation";
 import ErrorMessage from "./components/ErrorMessage";
+import CircleColor from "./components/CircleColor";
+import { v4 as uuid } from "uuid";
 
 const App = () => {
   const defaultProductObj = {
@@ -22,6 +24,7 @@ const App = () => {
   };
 
   // **State
+  const [products, setProducts] = useState<IProduct[]>(productList);
   const [product, setProduct] = useState<IProduct>(defaultProductObj);
   const [errors, setErrors] = useState({
     title: "",
@@ -29,9 +32,8 @@ const App = () => {
     imageURL: "",
     price: "",
   });
-  let [isOpen, setIsOpen] = useState(false);
-
-  console.log("errors", errors);
+  const [tempColors, setTempColors] = useState<string[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
 
   // **Handler
   const open = () => setIsOpen(true);
@@ -47,24 +49,6 @@ const App = () => {
       ...errors,
       [name]: "",
     });
-
-    // const { title, description, imageURL, price } = product;
-
-    // const errors = productValidation({
-    //   title,
-    //   description,
-    //   imageURL,
-    //   price,
-    // });
-
-    // const hasErrorMsg =
-    //   Object.values(errors).some((value) => value === "") &&
-    //   Object.values(errors).every((value) => value === "");
-
-    // if (!hasErrorMsg) {
-    //   setErrors(errors);
-    //   return;
-    // }
   };
 
   const submitHandler = (event: FormEvent<HTMLFormElement>): void => {
@@ -79,34 +63,32 @@ const App = () => {
       price,
     });
 
-    console.log(errors);
-
     // if any property has empty value &&
 
     const hasErrorMsg =
       Object.values(errors).some((value) => value === "") &&
       Object.values(errors).every((value) => value === "");
 
-    console.log(hasErrorMsg);
-
     if (!hasErrorMsg) {
       setErrors(errors);
       return;
     }
 
-    console.log("No Error Messages");
-
+    setProducts((prev) => [
+      { ...product, id: uuid(), colors: tempColors },
+      ...prev,
+    ]);
+    setProduct(defaultProductObj);
+    setTempColors([]);
     close();
   };
 
   const onCancel = () => {
-    console.log("Cancel");
-
     close();
   };
 
   // **Render
-  const products = productList.map((product) => (
+  const renderProductList = products.map((product) => (
     <ProductCard product={product} />
   ));
   const renderFormInputList = formInputsList.map(
@@ -129,18 +111,48 @@ const App = () => {
     )
   );
 
+  const renderProductColors = colors.map((color) => (
+    <CircleColor
+      key={color}
+      color={color}
+      onClick={async () => {
+        if (tempColors.includes(color)) {
+          setTempColors((prev) => prev.filter((co) => co !== color));
+          return;
+        }
+        setTempColors((prev) => [...prev, color]);
+      }}
+    />
+  ));
+
   return (
     <main className="container ">
       <Button onClick={open} className="bg-indigo-700 hover:bg-indigo-800 ">
         Add
       </Button>
       <div className="m-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-4 p-2 rounded-md">
-        {products ? products : <h1>No Products Yet</h1>}
-        {/* <ProductCard colors={} description="" imageURL="" price="" productName="" /> */}
+        {renderProductList ? renderProductList : <h1>No Products Yet</h1>}
         <MyModal isOpen={isOpen} close={close} title="Add A New Product">
           <div>
             <form className="space-y-3" onSubmit={submitHandler}>
               {renderFormInputList}
+
+              <div className="flex items-center flex-wrap space-x-1">
+                {tempColors.map((color) => (
+                  <span
+                    key={color}
+                    className={`p-1 mr-1 mb-1 text-xs rounded-md text-white`}
+                    style={{ backgroundColor: color }}
+                  >
+                    {color}
+                  </span>
+                ))}
+              </div>
+
+              <div className="flex items-center flex-wrap space-x-1">
+                {renderProductColors}
+              </div>
+
               <div className="flex flex-1 space-x-3">
                 <Button className="bg-indigo-700" type="submit">
                   Submit
@@ -156,5 +168,5 @@ const App = () => {
     </main>
   );
 };
-//
+
 export default App;
